@@ -18,10 +18,10 @@ Pod::Spec.new do |s|
   s.author           = { "Don Angelillo" => "dangelillo@gmail.com" }
   s.source           = { :git => "https://github.com/AdeptusAstartes/AlamofireRSSParser.git", :tag => s.version.to_s }
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '10.0'
   s.requires_arc = true
 
-  s.swift_version = '4.2'
+  s.swift_version = '5.1'
   s.source_files = 'Pod/Classes/**/*'
-  s.dependency 'Alamofire'
+  s.dependency 'Alamofire', '~> 5.0'
 end

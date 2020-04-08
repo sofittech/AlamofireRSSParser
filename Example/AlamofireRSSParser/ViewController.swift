@@ -16,8 +16,8 @@ class ViewController: UIViewController {
         
         let url = "http://feeds.foxnews.com/foxnews/latest?format=xml"
         
-        Alamofire.request(url).responseRSS() { (response) -> Void in
-            if let feed: RSSFeed = response.result.value {
+        AF.request(url).responseRSS() { (response) -> Void in
+            if let feed: RSSFeed = response.value {
                 //do something with your new RSSFeed object!
                 for item in feed.items {
                     print(item)

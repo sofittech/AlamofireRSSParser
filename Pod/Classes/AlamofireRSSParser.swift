@@ -9,57 +9,116 @@
 import Foundation
 import Alamofire
 
-extension Alamofire.DataRequest {
-    /**
-        Creates a response serializer that returns an `RSSFeed` object initialized from the response data.
-     
-        - Returns: An RSS response serializer.
-     */
-    public static func RSSResponseSerializer() -> DataResponseSerializer<RSSFeed> {
-        return DataResponseSerializer { request, response, data, error in
-            guard error == nil else {
-                return .failure(error!)
-            }
-            
-            guard let validData = data else {
-                let failureReason = "Data could not be serialized. Input data was nil."
-                let error = NSError(domain: "com.alamofirerssparser", code: -6004, userInfo: [NSLocalizedFailureReasonErrorKey: failureReason])
-                return .failure(error)
-            }
-            
-            let parser = AlamofireRSSParser(data: validData)
-            
-            let parsedResults: (feed: RSSFeed?, error: NSError?) = parser.parse()
-            
-            if let feed = parsedResults.feed {
-                return .success(feed)
-            } else {
-                return .failure(parsedResults.error!)
-            }
+extension DataRequest {
+    /// Adds a handler to be called once the request has finished.
+    ///
+    /// - Parameters:
+    ///   - queue:             The queue on which the completion handler is dispatched. `.main` by default.
+    ///   - options:           The JSON serialization reading options. `.allowFragments` by default.
+    ///   - completionHandler: A closure to be executed once the request has finished.
+    ///
+    /// - Returns:             The request.
+    @discardableResult
+    public func responseRSS(queue: DispatchQueue = .main,
+                             completionHandler: @escaping (AFDataResponse<RSSFeed>) -> Void) -> Self {
+        response(queue: queue, responseSerializer: RSSResponseSerializer(), completionHandler: completionHandler)
+    }
+}
+
+public final class RSSResponseSerializer: ResponseSerializer {
+    public let dataPreprocessor: DataPreprocessor
+    public let emptyResponseCodes: Set<Int>
+    public let emptyRequestMethods: Set<HTTPMethod>
+
+    /// Creates an instance with the provided values.
+    ///
+    /// - Parameters:
+    ///   - dataPreprocessor:    `DataPreprocessor` used to prepare the received `Data` for serialization.
+    ///   - emptyResponseCodes:  The HTTP response codes for which empty responses are allowed. `[204, 205]` by default.
+    ///   - emptyRequestMethods: The HTTP request methods for which empty responses are allowed. `[.head]` by default.
+    public init(dataPreprocessor: DataPreprocessor = JSONResponseSerializer.defaultDataPreprocessor, emptyResponseCodes: Set<Int> = JSONResponseSerializer.defaultEmptyResponseCodes, emptyRequestMethods: Set<HTTPMethod> = JSONResponseSerializer.defaultEmptyRequestMethods) {
+        self.dataPreprocessor = dataPreprocessor
+        self.emptyResponseCodes = emptyResponseCodes
+        self.emptyRequestMethods = emptyRequestMethods
+    }
+
+    public func serialize(request: URLRequest?, response: HTTPURLResponse?, data: Data?, error: Error?) throws -> RSSFeed {
+        guard error == nil else {
+            throw error!
+        }
+
+        guard let validData = data else {
+            let failureReason = "Data could not be serialized. Input data was nil."
+            let error = NSError(domain: "com.alamofirerssparser", code: -6004, userInfo: [NSLocalizedFailureReasonErrorKey: failureReason])
+            throw error
+        }
+
+        let parser = AlamofireRSSParser(data: validData)
+
+        let parsedResults: (feed: RSSFeed?, error: NSError?) = parser.parse()
+
+        if let feed = parsedResults.feed {
+            return feed
+        } else {
+            let failureReason = "Data could not be serialized."
+            let error = NSError(domain: "com.alamofirerssparser", code: -6004, userInfo: [NSLocalizedFailureReasonErrorKey: failureReason])
+            throw error
         }
     }
-    
-    
-    /**
-        Adds a handler to be called once the request has finished.
-        
-        - Parameter completionHandler: A closure to be executed once the request has finished.
-    
-        - Returns: The request.
-    */
-    @discardableResult
-    public func responseRSS(_ completionHandler: @escaping (DataResponse<RSSFeed>) -> Void) -> Self {
-        return response(
-            responseSerializer: DataRequest.RSSResponseSerializer(),
-            completionHandler: completionHandler
-        )
-    }
-    
+}
+
+
+//extension Alamofire.DataRequest {
+//    /**
+//        Creates a response serializer that returns an `RSSFeed` object initialized from the response data.
+//     
+//        - Returns: An RSS response serializer.
+//     */
+//    public static func RSSResponseSerializer() -> DataResponseSerializer<RSSFeed> {
+//        return DataResponseSerializer { request, response, data, error in
+//            guard error == nil else {
+//                return .failure(error!)
+//            }
+//            
+//            guard let validData = data else {
+//                let failureReason = "Data could not be serialized. Input data was nil."
+//                let error = NSError(domain: "com.alamofirerssparser", code: -6004, userInfo: [NSLocalizedFailureReasonErrorKey: failureReason])
+//                return .failure(error)
+//            }
+//            
+//            let parser = AlamofireRSSParser(data: validData)
+//            
+//            let parsedResults: (feed: RSSFeed?, error: NSError?) = parser.parse()
+//            
+//            if let feed = parsedResults.feed {
+//                return .success(feed)
+//            } else {
+//                return .failure(parsedResults.error!)
+//            }
+//        }
+//    }
+//    
+//    
+//    /**
+//        Adds a handler to be called once the request has finished.
+//        
+//        - Parameter completionHandler: A closure to be executed once the request has finished.
+//    
+//        - Returns: The request.
+//    */
+//    @discardableResult
+//    public func responseRSS(_ completionHandler: @escaping (AFDataResponse<RSSFeed>) -> Void) -> Self {
+//        return response(
+//            responseSerializer: DataRequest.RSSResponseSerializer(),
+//            completionHandler: completionHandler
+//        )
+//    }
+//    
     
     //public func responseRSS(parser parser: AlamofireRSSParser?, completionHandler: Response<RSSFeed, NSError> -> Void) -> Self {
     //  return response(responseSerializer: Request.RSSResponseSerializer(parser), completionHandler: completionHandler)
     //}
-}
+//}
 
 
 /**
