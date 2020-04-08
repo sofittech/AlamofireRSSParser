@@ -6,9 +6,9 @@
 [![Platform](https://img.shields.io/cocoapods/p/AlamofireRSSParser.svg?style=flat)](http://cocoapods.org/pods/AlamofireRSSParser)
 
 ## Requirements
-- Xcode 10.0+
-- Swift 4.2+
-- Alamofire 4.7.3+
+- Xcode 11.0+
+- Swift 5.1+
+- Alamofire 5.0.0+
 
 #### Legacy Swift Support
 _If you need to support an earlier version of Swift, please either download the zip or point your Podfile at the coresponding tag:_
@@ -20,23 +20,29 @@ _If you need to support an earlier version of Swift, please either download the 
 
 The respective readme's in those tags have more explicit instructions for using tags in CocoaPods.
 
+#### Legacy Alamofire Support
+_If you need to support an earlier version of Alamofire, please either download the zip or point your Podfile at the coresponding tag:_
+
+- **Alamofire 4**: tag "2.2.0"
+
 ## Installation
 
 ### Cocoapods
-AlamofireRSSParser is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
+AlamofireRSSParser is available through [CocoaPods](http://cocoapods.org). To install it, simply add the following line to your Podfile:
 
 ```ruby
 pod "AlamofireRSSParser"
 ```
 
-Then 
+Then
 
 ```swift
 import AlamofireRSSParser
-``` 
+```
  wherever you're using it.
- 
+
+**Note:  Since Alamofire is a dependency for AlamofireRSSParser, make sure you don't also include Alamofire in your Podile.**
+
 
 ### Manually
 Alternately you can add the contents of AlamofireRSSParser/Pod/Classes/ to your project and import the classes as appropriate.
@@ -48,11 +54,11 @@ _Note: To run the example project, clone the repo, and run `pod install` from th
 You use AlamofireRSSParser just like any other response handler in Alamofire:
 
 ```swift
-let url = "http://rss.cnn.com/rss/cnn_topstories.rss"
-    
-Alamofire.request(url).responseRSS() { (response) -> Void in
-    if let feed: RSSFeed = response.result.value {
-        //do something with your new RSSFeed object!
+let url = "http://feeds.foxnews.com/foxnews/latest?format=xml"
+
+AF.request(url).responseRSS() { (response) -> Void in
+    if let feed: RSSFeed = response.value {
+        /// Do something with your new RSSFeed object!
         for item in feed.items {
             print(item)
         }
@@ -62,7 +68,7 @@ Alamofire.request(url).responseRSS() { (response) -> Void in
 
 AlamofireRSSParser returns an RSSFeed object that contains an array of RSSItem objects.
 
-##What It Does and Doesn't Do
+## What It Does and Doesn't Do
 
 I think we can all admit that RSS implementations are a bit all over the place.  This project is meant to parse all of the common, high level bits of the [RSS 2.0 spec](http://cyber.law.harvard.edu/rss/rss.html) that people actually use/care about.  It is not meant to comprehensively parse **all** RSS.
 
@@ -89,15 +95,13 @@ Current elements:
 
 It also yanks all of the images that may be linked in the `itemDescription` (if it's HTML) and creates a nice array named `imagesFromDescription` that you can use for more image content.
 
-
 If you need more elements parsed please file an issue or even better, **please contribute**!  That's why this is on GitHub.
-
 
 ## Author
 
 Don Angelillo, dangelillo@gmail.com
 
-Inspired by Thibaut LE LEVIER's awesome orginal [Block RSSParser](https://github.com/tibo/BlockRSSParser) AFNetworking Plugin. 
+Inspired by Thibaut LE LEVIER's awesome orginal [Block RSSParser](https://github.com/tibo/BlockRSSParser) AFNetworking Plugin.
 
 ## License
 
