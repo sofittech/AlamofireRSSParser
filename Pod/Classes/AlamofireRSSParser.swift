@@ -152,6 +152,9 @@ open class AlamofireRSSParser: NSObject, XMLParserDelegate {
             if (elementName == "author") {
                 currentItem.author = self.currentString
             }
+            else if (elementName == "dc:creator") {
+                currentItem.author = self.currentString
+            }
             
             if (elementName == "comments") {
                 currentItem.comments = self.currentString
